@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyHub - Cornell Notes</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>📚</text></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Poppins:wght@400;600;700;800&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated background with glassy notebook pages */
+        .bg-glass-notes {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .glass-note {
+            position: absolute;
+            width: 100px;
+            height: 130px;
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(10px);
+            border-radius: 8px;
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            animation: drift-page 20s infinite ease-in-out;
+            box-shadow: 0 8px 32px rgba(255, 255, 255, 0.1);
+        }
+
+        .glass-note::before {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 12px;
+            right: 12px;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 
+                0 10px 0 rgba(255, 255, 255, 0.2),
+                0 20px 0 rgba(255, 255, 255, 0.2),
+                0 30px 0 rgba(255, 255, 255, 0.2),
+                0 40px 0 rgba(255, 255, 255, 0.2);
+        }
+
+        .glass-note::after {
+            content: '📝';
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            font-size: 1.5rem;
+            opacity: 0.3;
+        }
+
+        @keyframes drift-page {
+            0%, 100% { 
+                transform: translate(0, 0) rotate(0deg);
+            }
+            25% { 
+                transform: translate(40px, -30px) rotate(5deg);
+            }
+            50% { 
+                transform: translate(-30px, -50px) rotate(-5deg);
+            }
+            75% { 
+                transform: translate(30px, -20px) rotate(3deg);
+            }
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Floating Navigation */
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px 35px;
+            border-radius: 50px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
+        }
+
+        .navbar:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.25);
+        }
+
+        .navbar a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.1rem;
+            font-family: 'Fredoka', sans-serif;
+            transition: all 0.3s;
+            padding: 10px 20px;
+            border-radius: 25px;
+        }
+
+        .navbar a:hover {
+            background: #667eea;
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .navbar .brand {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: #1e3a8a;
+        }
+
+        /* Hero Header */
+        .header {
+            background: white;
+            padding: 50px;
+            border-radius: 30px;
+            margin-bottom: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transform: rotate(-1deg);
+            transition: all 0.4s;
+        }
+
+        .header:hover {
+            transform: rotate(0deg) scale(1.02);
+            box-shadow: 0 25px 70px rgba(118, 75, 162, 0.3);
+        }
+
+        .header::before {
+            content: '📝';
+            position: absolute;
+            font-size: 5rem;
+            top: 10px;
+            left: 20px;
+            animation: writing-motion 3s infinite ease-in-out;
+        }
+
+        @keyframes writing-motion {
+            0%, 100% { transform: translate(0, 0) rotate(-10deg); }
+            50% { transform: translate(10px, -5px) rotate(-5deg); }
+        }
+
+        .page-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 900;
+            background: linear-gradient(135deg, #764ba2, #667eea);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 15px;
+        }
+
+        .page-description {
+            font-family: 'Fredoka', sans-serif;
+            color: #64748b;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        /* Info Box */
+        .info-box {
+            background: linear-gradient(135deg, #f0f9ff, #dbeafe);
+            border-left: 6px solid #3b82f6;
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 35px;
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .info-box::before {
+            content: '✍️';
+            position: absolute;
+            font-size: 8rem;
+            opacity: 0.06;
+            top: -15px;
+            right: -10px;
+            animation: pen-wave 5s ease-in-out infinite;
+        }
+
+        @keyframes pen-wave {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(15deg); }
+        }
+
+        .info-box h4 {
+            font-family: 'Fredoka', sans-serif;
+            color: #1e40af;
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+        }
+
+        .info-box p {
+            color: #1e3a8a;
+            line-height: 1.8;
+            font-size: 1.05rem;
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            padding: 45px;
+            border-radius: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            transition: all 0.4s;
+            margin-bottom: 30px;
+            transform: rotate(0.5deg);
+        }
+
+        .card:hover {
+            transform: rotate(0deg) translateY(-5px);
+            box-shadow: 0 25px 70px rgba(118, 75, 162, 0.3);
+        }
+
+        .card-title {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #764ba2;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .card-title::before {
+            content: '📝';
+            font-size: 2rem;
+            animation: note-wiggle 2s infinite;
+        }
+
+        @keyframes note-wiggle {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-8deg); }
+            75% { transform: rotate(8deg); }
+        }
+
+        /* Cornell Note Template */
+        .cornell-template {
+            background: linear-gradient(135deg, #fefce8, #fef9c3);
+            border: 3px solid #eab308;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(234, 179, 8, 0.2);
+        }
+
+        .cornell-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .cornell-section {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            min-height: 200px;
+            border: 2px solid #e5e7eb;
+        }
+
+        .cornell-section-title {
+            font-family: 'Fredoka', sans-serif;
+            font-weight: 700;
+            color: #92400e;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .cornell-section textarea {
+            width: 100%;
+            min-height: 150px;
+            border: none;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
+            resize: vertical;
+            background: transparent;
+            color: #334155;
+            line-height: 1.7;
+        }
+
+        .cornell-section textarea:focus {
+            outline: none;
+        }
+
+        .cornell-summary {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid #e5e7eb;
+        }
+
+        .cornell-summary textarea {
+            width: 100%;
+            min-height: 100px;
+            border: none;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
+            resize: vertical;
+            background: transparent;
+            color: #334155;
+            line-height: 1.7;
+        }
+
+        .cornell-summary textarea:focus {
+            outline: none;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 12px;
+            font-weight: 700;
+            color: #334155;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.05rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 18px 25px;
+            border: 3px solid #e2e8f0;
+            border-radius: 20px;
+            font-size: 1.05rem;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.3s;
+            background: #f8fafc;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #764ba2;
+            background: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(118, 75, 162, 0.2);
+        }
+
+        /* Button Styles */
+        .btn {
+            background: linear-gradient(135deg, #764ba2, #667eea);
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 1.15rem;
+            font-weight: 700;
+            font-family: 'Fredoka', sans-serif;
+            transition: all 0.3s;
+            box-shadow: 0 10px 30px rgba(118, 75, 162, 0.3);
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:hover::before {
+            width: 400px;
+            height: 400px;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(118, 75, 162, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            padding: 12px 24px;
+            font-size: 0.95rem;
+            width: auto;
+        }
+
+        /* Note Items */
+        .note-item {
+            background: linear-gradient(135deg, #fffbeb, #fef3c7);
+            padding: 30px;
+            border-radius: 25px;
+            margin-bottom: 20px;
+            border-left: 6px solid #eab308;
+            box-shadow: 0 10px 30px rgba(234, 179, 8, 0.15);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .note-item::before {
+            content: '📄';
+            position: absolute;
+            font-size: 6rem;
+            opacity: 0.05;
+            top: -10px;
+            right: -10px;
+            animation: page-float 10s ease-in-out infinite;
+        }
+
+        @keyframes page-float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .note-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(234, 179, 8, 0.25);
+        }
+
+        .note-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .note-title {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #92400e;
+            flex: 1;
+        }
+
+        .note-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .note-section {
+            background: white;
+            padding: 18px;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(234, 179, 8, 0.1);
+        }
+
+        .note-section-label {
+            font-family: 'Fredoka', sans-serif;
+            font-weight: 700;
+            color: #92400e;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        .note-section-text {
+            color: #334155;
+            line-height: 1.7;
+        }
+
+        .note-summary-box {
+            background: white;
+            padding: 18px;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(234, 179, 8, 0.1);
+            margin-top: 15px;
+        }
+
+        .note-count {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(135deg, rgba(118, 75, 162, 0.1), rgba(102, 126, 234, 0.1));
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-weight: 700;
+            color: #764ba2;
+            font-family: 'Fredoka', sans-serif;
+        }
+
+        .note-count span {
+            font-size: 1.4rem;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 80px 40px;
+        }
+
+        .empty-state-icon {
+            font-size: 6rem;
+            margin-bottom: 25px;
+            opacity: 0.4;
+            animation: note-sway 3s ease-in-out infinite;
+        }
+
+        @keyframes note-sway {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-5deg); }
+            75% { transform: rotate(5deg); }
+        }
+
+        .empty-state p {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #64748b;
+            line-height: 1.6;
+        }
+
+        /* Responsive */
+        @media (max-width: 968px) {
+            .cornell-grid,
+            .note-content {
+                grid-template-columns: 1fr;
+            }
+
+            .navbar {
+                padding: 15px 25px;
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .header {
+                padding: 35px 25px;
+            }
+
+            .card {
+                padding: 30px 20px;
+            }
+
+            .note-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .note-item {
+                padding: 25px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Background with Glassy Notebook Pages -->
+    <div class="bg-glass-notes">
+        <div class="glass-note" style="top: 10%; left: 8%; animation-delay: 0s;"></div>
+        <div class="glass-note" style="top: 50%; right: 12%; animation-delay: 4s;"></div>
+        <div class="glass-note" style="bottom: 18%; left: 15%; animation-delay: 8s;"></div>
+        <div class="glass-note" style="top: 35%; right: 30%; animation-delay: 12s;"></div>
+        <div class="glass-note" style="bottom: 40%; left: 35%; animation-delay: 16s;"></div>
+    </div>
+
+    <div class="container">
+        <!-- Navigation -->
+        <nav class="navbar">
+     <a href="studyhub-homepage.html">← Back to Home</a>
+            <span class="brand">📚 StudyHub</span>
+        </nav>
+
+        <!-- Header -->
+        <div class="header">
+            <h1 class="page-title">Cornell Notes 📝</h1>
+            <p class="page-description">Take organized notes with the Cornell method</p>
+        </div>
+
+        <!-- Info Box -->
+        <div class="info-box">
+            <h4>📝 What is the Cornell Method?</h4>
+            <p>The Cornell Note-Taking System divides your page into three sections: Cues (questions/keywords), Notes (main content), and Summary (brief overview). This structure helps you review and retain information more effectively!</p>
+        </div>
+
+        <!-- Create Note Card -->
+        <div class="card">
+            <h3 class="card-title">Create Cornell Note</h3>
+            
+            <div class="form-group">
+                <label>📚 Topic/Subject</label>
+                <input type="text" id="noteTitle" placeholder="e.g., Biology Chapter 5, Physics Lecture 3">
+            </div>
+
+            <div class="cornell-template">
+                <div class="cornell-grid">
+                    <div class="cornell-section">
+                        <div class="cornell-section-title">🔑 Cues</div>
+                        <textarea id="noteCues" placeholder="Write key questions, keywords, or main ideas here..."></textarea>
+                    </div>
+                    <div class="cornell-section">
+                        <div class="cornell-section-title">📝 Notes</div>
+                        <textarea id="noteContent" placeholder="Write your detailed notes here..."></textarea>
+                    </div>
+                </div>
+                <div class="cornell-summary">
+                    <div class="cornell-section-title">📋 Summary</div>
+                    <textarea id="noteSummary" placeholder="Write a brief summary of the main points..."></textarea>
+                </div>
+            </div>
+
+            <button class="btn" onclick="addNote()">💾 Save Note</button>
+        </div>
+
+        <!-- Notes List Card -->
+        <div class="card">
+            <h3 class="card-title">
+                📚 My Cornell Notes 
+                <span class="note-count">
+                    <span id="noteCount">0</span> total
+                </span>
+            </h3>
+            <div id="noteList"></div>
+        </div>
+    </div>
+
+    <script>
+        let cornellNotes = JSON.parse(localStorage.getItem('cornellNotes')) || [];
+
+        function addNote() {
+            const note = {
+                title: document.getElementById('noteTitle').value.trim(),
+                cues: document.getElementById('noteCues').value.trim(),
+                content: document.getElementById('noteContent').value.trim(),
+                summary: document.getElementById('noteSummary').value.trim(),
+                id: Date.now(),
+                created: new Date().toLocaleDateString()
+            };
+
+            if (note.title && (note.cues || note.content || note.summary)) {
+                cornellNotes.push(note);
+                localStorage.setItem('cornellNotes', JSON.stringify(cornellNotes));
+                
+                document.getElementById('noteTitle').value = '';
+                document.getElementById('noteCues').value = '';
+                document.getElementById('noteContent').value = '';
+                document.getElementById('noteSummary').value = '';
+                
+                // Visual feedback
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = '✅ Note Saved!';
+                btn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+                
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = 'linear-gradient(135deg, #764ba2, #667eea)';
+                }, 2000);
+                
+                displayNotes();
+            } else {
+                alert('⚠️ Please fill in at least the title and one section!');
+            }
+        }
+
+        function displayNotes() {
+            const list = document.getElementById('noteList');
+            document.getElementById('noteCount').textContent = cornellNotes.length;
+
+            if (cornellNotes.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📝</div>
+                        <p>No notes yet.<br>Create your first Cornell note!</p>
+                    </div>
+                `;
+            } else {
+                list.innerHTML = cornellNotes.map((note, i) => `
+                    <div class="note-item">
+                        <div class="note-header">
+                            <div class="note-title">📝 ${note.title}</div>
+                            <button class="btn btn-danger" onclick="deleteNote(${i})">🗑️ Delete</button>
+                        </div>
+                        
+                        <div class="note-content">
+                            ${note.cues ? `
+                                <div class="note-section">
+                                    <div class="note-section-label">🔑 Cues</div>
+                                    <div class="note-section-text">${note.cues}</div>
+                                </div>
+                            ` : '<div></div>'}
+                            ${note.content ? `
+                                <div class="note-section">
+                                    <div class="note-section-label">📝 Notes</div>
+                                    <div class="note-section-text">${note.content}</div>
+                                </div>
+                            ` : '<div></div>'}
+                        </div>
+                        
+                        ${note.summary ? `
+                            <div class="note-summary-box">
+                                <div class="note-section-label">📋 Summary</div>
+                                <div class="note-section-text">${note.summary}</div>
+                            </div>
+                        ` : ''}
+                        
+                        <div style="margin-top: 15px; color: #92400e; font-size: 0.9rem; font-style: italic;">
+                            Created: ${note.created}
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function deleteNote(index) {
+            if (confirm('🗑️ Delete this note? This cannot be undone.')) {
+                cornellNotes.splice(index, 1);
+                localStorage.setItem('cornellNotes', JSON.stringify(cornellNotes));
+                displayNotes();
+            }
+        }
+
+        // Initialize
+        displayNotes();
+    </script>
+</body>
+</html>

@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyHub - Mind Map</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>📚</text></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Poppins:wght@400;600;700;800&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated Neural Network Background */
+        .neural-network {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.15;
+        }
+
+        .neuron {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: white;
+            border-radius: 50%;
+            animation: pulse 3s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.5); }
+        }
+
+        /* Particles */
+        .particles {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 0;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            animation: float 20s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0); opacity: 0.3; }
+            50% { transform: translate(-50px, -200px); opacity: 0.8; }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .navbar {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            padding: 20px 30px;
+            border-radius: 50px;
+            margin-bottom: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.1rem;
+            font-family: 'Fredoka', sans-serif;
+            transition: all 0.3s;
+            padding: 8px 20px;
+            border-radius: 20px;
+        }
+
+        .navbar a:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .navbar span {
+            color: white;
+            font-size: 1.5rem;
+            font-family: 'Playfair Display', serif;
+            font-weight: 900;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            padding: 40px;
+            border-radius: 30px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .page-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem;
+            color: white;
+            margin-bottom: 15px;
+            font-weight: 900;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .page-description {
+            color: rgba(255, 255, 255, 0.95);
+            font-size: 1.2rem;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .card {
+            background: white;
+            padding: 40px;
+            border-radius: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            margin-bottom: 30px;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 30px;
+            font-weight: 900;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 700;
+            font-family: 'Fredoka', sans-serif;
+            color: #667eea;
+            font-size: 1.1rem;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 15px;
+            font-size: 1rem;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group textarea {
+            min-height: 180px;
+            resize: vertical;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 35px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 700;
+            font-family: 'Fredoka', sans-serif;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            padding: 10px 20px;
+            font-size: 0.9rem;
+        }
+
+        .btn-danger:hover {
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+        }
+
+        .mindmap-item {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+            padding: 30px;
+            border-radius: 25px;
+            margin-bottom: 25px;
+            border-left: 5px solid #667eea;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .mindmap-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .mindmap-title {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.6rem;
+            color: #667eea;
+            font-weight: 700;
+        }
+
+        .mindmap-canvas-container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .mindmap-canvas {
+            position: relative;
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .central-topic {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px 40px;
+            border-radius: 50px;
+            font-size: 1.5rem;
+            font-family: 'Fredoka', sans-serif;
+            font-weight: 700;
+            display: inline-block;
+            margin-bottom: 60px;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+            position: relative;
+            z-index: 2;
+            animation: popIn 0.5s ease-out;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .branches-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .branch {
+            background: white;
+            border: 3px solid #667eea;
+            padding: 18px 30px;
+            border-radius: 25px;
+            font-weight: 600;
+            font-family: 'Poppins', sans-serif;
+            color: #667eea;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+            transition: all 0.3s;
+            animation: branchAppear 0.5s ease-out backwards;
+        }
+
+        .branch:nth-child(1) { animation-delay: 0.1s; }
+        .branch:nth-child(2) { animation-delay: 0.2s; }
+        .branch:nth-child(3) { animation-delay: 0.3s; }
+        .branch:nth-child(4) { animation-delay: 0.4s; }
+        .branch:nth-child(5) { animation-delay: 0.5s; }
+        .branch:nth-child(6) { animation-delay: 0.6s; }
+
+        @keyframes branchAppear {
+            from {
+                opacity: 0;
+                transform: scale(0) rotate(-10deg);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) rotate(0deg);
+            }
+        }
+
+        .branch:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+            border-color: #764ba2;
+            color: #764ba2;
+        }
+
+        .count-badge {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #64748b;
+            font-size: 1.1rem;
+        }
+
+        @media (max-width: 768px) {
+            .page-title {
+                font-size: 2.5rem;
+            }
+
+            .navbar {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .mindmap-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .central-topic {
+                font-size: 1.2rem;
+                padding: 20px 30px;
+            }
+
+            .branch {
+                font-size: 0.9rem;
+                padding: 12px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Elements -->
+    <div class="particles" id="particles"></div>
+    <div class="neural-network" id="neuralNetwork"></div>
+
+    <div class="container">
+        <div class="navbar">
+     <a href="studyhub-homepage.html">← Back to Home</a>
+            <span>📚 StudyHub</span>
+        </div>
+
+        <div class="header">
+            <h1 class="page-title">Mind Map 🧠</h1>
+            <p class="page-description">Visualize connections between ideas</p>
+        </div>
+
+        <div class="card">
+            <h3 class="card-title">Create Mind Map</h3>
+            
+            <div class="form-group">
+                <label>💡 Central Topic (Main Idea)</label>
+                <input type="text" id="mindmapTopic" placeholder="e.g., World War II, Renewable Energy, Marketing Strategy">
+            </div>
+
+            <div class="form-group">
+                <label>🌿 Branches (Subtopics - one per line)</label>
+                <textarea id="mindmapBranches" placeholder="Enter each branch on a new line:
+Causes
+Events
+Consequences
+Key Figures
+Timeline" rows="8"></textarea>
+            </div>
+
+            <button class="btn" onclick="saveMindmap()">💾 Save Mind Map</button>
+        </div>
+
+        <div class="card">
+            <h3 class="card-title">
+                My Mind Maps
+                <span class="count-badge" id="mindmapCount">0</span>
+            </h3>
+            <div id="mindmapList"></div>
+        </div>
+    </div>
+
+    <script>
+        // Create particles
+        const particlesContainer = document.getElementById('particles');
+        for (let i = 0; i < 30; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.top = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 20 + 's';
+            particle.style.animationDuration = (Math.random() * 15 + 15) + 's';
+            particlesContainer.appendChild(particle);
+        }
+
+        // Create neural network background
+        const neuralNetwork = document.getElementById('neuralNetwork');
+        for (let i = 0; i < 20; i++) {
+            const neuron = document.createElement('div');
+            neuron.className = 'neuron';
+            neuron.style.left = Math.random() * 100 + '%';
+            neuron.style.top = Math.random() * 100 + '%';
+            neuron.style.animationDelay = Math.random() * 3 + 's';
+            neuralNetwork.appendChild(neuron);
+        }
+
+        let mindmaps = JSON.parse(localStorage.getItem('mindmaps')) || [];
+
+        function saveMindmap() {
+            const topic = document.getElementById('mindmapTopic').value.trim();
+            const branchesText = document.getElementById('mindmapBranches').value.trim();
+            
+            if (topic && branchesText) {
+                const branches = branchesText.split('\n').map(b => b.trim()).filter(b => b);
+                
+                if (branches.length === 0) {
+                    alert('⚠️ Please add at least one branch!');
+                    return;
+                }
+
+                mindmaps.push({
+                    topic: topic,
+                    branches: branches,
+                    id: Date.now()
+                });
+                
+                localStorage.setItem('mindmaps', JSON.stringify(mindmaps));
+                
+                document.getElementById('mindmapTopic').value = '';
+                document.getElementById('mindmapBranches').value = '';
+                
+                alert('🧠 Mind map saved successfully!');
+                displayMindmaps();
+            } else {
+                alert('⚠️ Please fill in both the topic and branches!');
+            }
+        }
+
+        function createConnections(container, branches) {
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            const centralTopic = container.querySelector('.central-topic');
+            const branchElements = container.querySelectorAll('.branch');
+            
+            if (!centralTopic || branchElements.length === 0) return;
+
+            setTimeout(() => {
+                const centralRect = centralTopic.getBoundingClientRect();
+                const containerRect = container.getBoundingClientRect();
+                
+                const centralX = centralRect.left - containerRect.left + centralRect.width / 2;
+                const centralY = centralRect.top - containerRect.top + centralRect.height / 2;
+
+                branchElements.forEach((branch, index) => {
+                    const branchRect = branch.getBoundingClientRect();
+                    const branchX = branchRect.left - containerRect.left + branchRect.width / 2;
+                    const branchY = branchRect.top - containerRect.top + branchRect.height / 2;
+
+                    const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    const midX = (centralX + branchX) / 2;
+                    const curve = Math.abs(centralY - branchY) / 3;
+                    
+                    const d = `M ${centralX} ${centralY} Q ${midX} ${centralY - curve}, ${branchX} ${branchY}`;
+                    
+                    line.setAttribute('d', d);
+                    line.setAttribute('stroke', '#667eea');
+                    line.setAttribute('stroke-width', '2');
+                    line.setAttribute('fill', 'none');
+                    line.setAttribute('opacity', '0.4');
+                    line.style.strokeDasharray = '1000';
+                    line.style.strokeDashoffset = '1000';
+                    line.style.animation = `drawLine 1s ease-out ${index * 0.1}s forwards`;
+                    
+                    svg.appendChild(line);
+                });
+
+                container.appendChild(svg);
+            }, 100);
+        }
+
+        // Add CSS for line animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes drawLine {
+                to {
+                    stroke-dashoffset: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        function displayMindmaps() {
+            const list = document.getElementById('mindmapList');
+            document.getElementById('mindmapCount').textContent = mindmaps.length;
+
+            if (mindmaps.length === 0) {
+                list.innerHTML = '<div class="empty-state">No mind maps yet. Create your first one! 🧠✨</div>';
+            } else {
+                list.innerHTML = '';
+                
+                mindmaps.forEach((map, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'mindmap-item';
+                    
+                    const header = document.createElement('div');
+                    header.className = 'mindmap-header';
+                    
+                    const title = document.createElement('div');
+                    title.className = 'mindmap-title';
+                    title.textContent = `🧠 ${map.topic}`;
+                    
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.className = 'btn btn-danger';
+                    deleteBtn.textContent = '🗑️ Delete';
+                    deleteBtn.addEventListener('click', () => deleteMindmap(index));
+                    
+                    header.appendChild(title);
+                    header.appendChild(deleteBtn);
+                    
+                    const canvasContainer = document.createElement('div');
+                    canvasContainer.className = 'mindmap-canvas-container';
+                    
+                    const canvas = document.createElement('div');
+                    canvas.className = 'mindmap-canvas';
+                    
+                    const central = document.createElement('div');
+                    central.className = 'central-topic';
+                    central.textContent = map.topic;
+                    
+                    const branchesContainer = document.createElement('div');
+                    branchesContainer.className = 'branches-container';
+                    
+                    map.branches.forEach(branch => {
+                        const branchEl = document.createElement('div');
+                        branchEl.className = 'branch';
+                        branchEl.textContent = branch;
+                        branchesContainer.appendChild(branchEl);
+                    });
+                    
+                    canvas.appendChild(central);
+                    canvas.appendChild(branchesContainer);
+                    canvasContainer.appendChild(canvas);
+                    
+                    item.appendChild(header);
+                    item.appendChild(canvasContainer);
+                    list.appendChild(item);
+                    
+                    // Create connections after DOM is updated
+                    createConnections(canvasContainer, map.branches);
+                });
+            }
+        }
+
+        function deleteMindmap(index) {
+            if (confirm('Delete this mind map?')) {
+                mindmaps.splice(index, 1);
+                localStorage.setItem('mindmaps', JSON.stringify(mindmaps));
+                displayMindmaps();
+            }
+        }
+
+        // Initialize
+        displayMindmaps();
+    </script>
+</body>
+</html>

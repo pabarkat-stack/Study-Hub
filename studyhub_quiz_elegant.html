@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyHub - Quiz Maker</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>📚</text></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Poppins:wght@400;600;700;800&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated background elements */
+        .bg-shapes {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .floating-shape {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            animation: float 20s infinite ease-in-out;
+        }
+
+        .shape1 {
+            width: 300px;
+            height: 300px;
+            top: 10%;
+            left: 5%;
+            animation-delay: 0s;
+        }
+
+        .shape2 {
+            width: 200px;
+            height: 200px;
+            top: 60%;
+            right: 10%;
+            animation-delay: 3s;
+        }
+
+        .shape3 {
+            width: 150px;
+            height: 150px;
+            bottom: 10%;
+            left: 40%;
+            animation-delay: 6s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(30px, -30px) rotate(90deg); }
+            50% { transform: translate(-20px, 20px) rotate(180deg); }
+            75% { transform: translate(20px, 30px) rotate(270deg); }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Floating Navigation */
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px 35px;
+            border-radius: 50px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
+        }
+
+        .navbar:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.25);
+        }
+
+        .navbar a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.1rem;
+            font-family: 'Fredoka', sans-serif;
+            transition: all 0.3s;
+            padding: 10px 20px;
+            border-radius: 25px;
+        }
+
+        .navbar a:hover {
+            background: #667eea;
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .navbar .brand {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Hero Header */
+        .header {
+            background: white;
+            padding: 50px;
+            border-radius: 30px;
+            margin-bottom: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transform: rotate(-1deg);
+            transition: all 0.4s;
+        }
+
+        .header:hover {
+            transform: rotate(0deg) scale(1.02);
+            box-shadow: 0 25px 70px rgba(102, 126, 234, 0.3);
+        }
+
+        .header::before {
+            content: '✨';
+            position: absolute;
+            font-size: 3rem;
+            top: 20px;
+            right: 30px;
+            animation: sparkle 2s infinite;
+        }
+
+        @keyframes sparkle {
+            0%, 100% { opacity: 1; transform: rotate(0deg) scale(1); }
+            50% { opacity: 0.5; transform: rotate(180deg) scale(1.2); }
+        }
+
+        .page-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 900;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 15px;
+        }
+
+        .page-description {
+            font-family: 'Fredoka', sans-serif;
+            color: #64748b;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        /* Grid Layout */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        /* Card Styles */
+        .card {
+            background: white;
+            padding: 40px;
+            border-radius: 25px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
+            transition: all 0.4s;
+            border: 4px solid transparent;
+            position: relative;
+        }
+
+        .card:nth-child(1) {
+            transform: rotate(-0.5deg);
+        }
+
+        .card:nth-child(2) {
+            transform: rotate(0.5deg);
+        }
+
+        .card:hover {
+            transform: rotate(0deg) translateY(-10px);
+            box-shadow: 0 25px 70px rgba(102, 126, 234, 0.3);
+            border-color: rgba(102, 126, 234, 0.2);
+        }
+
+        .card-title {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-title::before {
+            content: '❓';
+            font-size: 2rem;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 700;
+            color: #334155;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 0.95rem;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 15px 20px;
+            border: 3px solid #e2e8f0;
+            border-radius: 15px;
+            font-size: 1rem;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.3s;
+            background: #f8fafc;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.2);
+        }
+
+        /* Button Styles */
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 700;
+            font-family: 'Fredoka', sans-serif;
+            transition: all 0.3s;
+            width: 100%;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+
+        .question-counter {
+            margin-top: 20px;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            border-radius: 15px;
+            text-align: center;
+            font-family: 'Fredoka', sans-serif;
+        }
+
+        .question-counter strong {
+            font-size: 2rem;
+            color: #667eea;
+            display: block;
+            margin-top: 5px;
+        }
+
+        /* Quiz Display */
+        .quiz-question {
+            background: linear-gradient(135deg, #f8fafc, #e0e7ff);
+            padding: 35px;
+            border-radius: 20px;
+            margin-bottom: 25px;
+            border-left: 6px solid #667eea;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.1);
+        }
+
+        .quiz-question h4 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.2rem;
+        }
+
+        .quiz-question p {
+            font-size: 1.3rem;
+            margin-bottom: 25px;
+            color: #1e293b;
+            font-weight: 600;
+            line-height: 1.6;
+        }
+
+        .quiz-option {
+            background: white;
+            padding: 20px 25px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            border: 3px solid #e2e8f0;
+            transition: all 0.3s;
+            font-size: 1.05rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .quiz-option::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 0;
+            background: linear-gradient(90deg, rgba(102, 126, 234, 0.1), transparent);
+            transition: width 0.3s;
+        }
+
+        .quiz-option:hover::before {
+            width: 100%;
+        }
+
+        .quiz-option:hover {
+            border-color: #667eea;
+            transform: translateX(10px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.2);
+        }
+
+        .quiz-option strong {
+            color: #667eea;
+            font-weight: 800;
+            margin-right: 10px;
+            font-family: 'Fredoka', sans-serif;
+        }
+
+        .quiz-option.correct {
+            border-color: #10b981;
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+            animation: correctPulse 0.5s;
+        }
+
+        .quiz-option.correct::after {
+            content: '✓';
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.5rem;
+            color: #10b981;
+            font-weight: bold;
+        }
+
+        .quiz-option.incorrect {
+            border-color: #ef4444;
+            background: linear-gradient(135deg, #fee2e2, #fecaca);
+            animation: shake 0.5s;
+        }
+
+        .quiz-option.incorrect::after {
+            content: '✗';
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.5rem;
+            color: #ef4444;
+            font-weight: bold;
+        }
+
+        @keyframes correctPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        /* Result Box */
+        .result-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 50px;
+            border-radius: 25px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .result-box::before {
+            content: '🎉';
+            position: absolute;
+            font-size: 8rem;
+            opacity: 0.1;
+            top: -20px;
+            right: -20px;
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .result-score {
+            font-family: 'Playfair Display', serif;
+            font-size: 5rem;
+            font-weight: 900;
+            margin-bottom: 20px;
+            text-shadow: 5px 5px 0 rgba(0, 0, 0, 0.2);
+            animation: popIn 0.5s ease-out;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .result-box h3 {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 2rem;
+            margin-bottom: 15px;
+        }
+
+        .result-box p {
+            font-size: 1.3rem;
+            margin-bottom: 30px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 40px;
+            color: #64748b;
+        }
+
+        .empty-state-icon {
+            font-size: 5rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+            animation: sway 3s ease-in-out infinite;
+        }
+
+        @keyframes sway {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-10deg); }
+            75% { transform: rotate(10deg); }
+        }
+
+        .empty-state p {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        /* Responsive */
+        @media (max-width: 968px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .navbar {
+                padding: 15px 25px;
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .header {
+                padding: 35px 25px;
+            }
+
+            .card {
+                padding: 30px 25px;
+            }
+
+            .result-score {
+                font-size: 4rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="bg-shapes">
+        <div class="floating-shape shape1"></div>
+        <div class="floating-shape shape2"></div>
+        <div class="floating-shape shape3"></div>
+    </div>
+
+    <div class="container">
+        <!-- Navigation -->
+        <nav class="navbar">
+     <a href="studyhub-homepage.html">← Back to Home</a>
+            <span class="brand">📚 StudyHub</span>
+        </nav>
+
+        <!-- Header -->
+        <div class="header">
+            <h1 class="page-title">Quiz Maker ❓</h1>
+            <p class="page-description">Test your knowledge with custom quizzes</p>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="grid-2">
+            <!-- Create Quiz Card -->
+            <div class="card">
+                <h3 class="card-title">Create Question</h3>
+                <div class="form-group">
+                    <label>📝 Question</label>
+                    <input type="text" id="quizQuestion" placeholder="Enter your question">
+                </div>
+                <div class="form-group">
+                    <label>🅰️ Option A</label>
+                    <input type="text" id="quizOptionA" placeholder="First option">
+                </div>
+                <div class="form-group">
+                    <label>🅱️ Option B</label>
+                    <input type="text" id="quizOptionB" placeholder="Second option">
+                </div>
+                <div class="form-group">
+                    <label>🅲 Option C</label>
+                    <input type="text" id="quizOptionC" placeholder="Third option">
+                </div>
+                <div class="form-group">
+                    <label>🅳 Option D</label>
+                    <input type="text" id="quizOptionD" placeholder="Fourth option">
+                </div>
+                <div class="form-group">
+                    <label>✅ Correct Answer</label>
+                    <select id="quizCorrect">
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="C">C</option>
+                        <option value="D">D</option>
+                    </select>
+                </div>
+                <button class="btn" onclick="addQuizQuestion()">➕ Add Question</button>
+                <div class="question-counter">
+                    <span style="color: #64748b;">Total Questions</span>
+                    <strong id="totalQuestions">0</strong>
+                </div>
+            </div>
+
+            <!-- Take Quiz Card -->
+            <div class="card">
+                <h3 class="card-title">Take Quiz</h3>
+                <div id="quizDisplay"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let quizQuestions = JSON.parse(localStorage.getItem('quizQuestions')) || [];
+        let currentQuizIndex = 0;
+        let quizScore = 0;
+        let selectedAnswers = [];
+
+        function addQuizQuestion() {
+            const question = {
+                question: document.getElementById('quizQuestion').value.trim(),
+                options: {
+                    A: document.getElementById('quizOptionA').value.trim(),
+                    B: document.getElementById('quizOptionB').value.trim(),
+                    C: document.getElementById('quizOptionC').value.trim(),
+                    D: document.getElementById('quizOptionD').value.trim()
+                },
+                correct: document.getElementById('quizCorrect').value,
+                id: Date.now()
+            };
+
+            if (question.question && question.options.A && question.options.B && question.options.C && question.options.D) {
+                quizQuestions.push(question);
+                localStorage.setItem('quizQuestions', JSON.stringify(quizQuestions));
+                
+                // Clear form
+                document.getElementById('quizQuestion').value = '';
+                document.getElementById('quizOptionA').value = '';
+                document.getElementById('quizOptionB').value = '';
+                document.getElementById('quizOptionC').value = '';
+                document.getElementById('quizOptionD').value = '';
+                
+                // Show success feedback
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = '✅ Question Added!';
+                btn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+                
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = 'linear-gradient(135deg, #667eea, #764ba2)';
+                }, 2000);
+                
+                updateQuestionCount();
+                displayQuiz();
+            } else {
+                alert('⚠️ Please fill in all fields!');
+            }
+        }
+
+        function updateQuestionCount() {
+            document.getElementById('totalQuestions').textContent = quizQuestions.length;
+        }
+
+        function displayQuiz() {
+            const display = document.getElementById('quizDisplay');
+            
+            if (quizQuestions.length === 0) {
+                display.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🤔</div>
+                        <p>No questions yet.<br>Create some first!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            if (currentQuizIndex >= quizQuestions.length) {
+                showQuizResults();
+                return;
+            }
+
+            const q = quizQuestions[currentQuizIndex];
+            display.innerHTML = `
+                <div class="quiz-question">
+                    <h4>Question ${currentQuizIndex + 1} of ${quizQuestions.length}</h4>
+                    <p>${q.question}</p>
+                    ${['A', 'B', 'C', 'D'].map(opt => `
+                        <div class="quiz-option" onclick="selectAnswer('${opt}')">
+                            <strong>${opt}</strong> ${q.options[opt]}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function selectAnswer(answer) {
+            const q = quizQuestions[currentQuizIndex];
+            const options = document.querySelectorAll('.quiz-option');
+            
+            options.forEach(opt => {
+                opt.style.pointerEvents = 'none';
+                const optLetter = opt.querySelector('strong').textContent.trim();
+                if (optLetter === q.correct) {
+                    opt.classList.add('correct');
+                }
+                if (optLetter === answer && answer !== q.correct) {
+                    opt.classList.add('incorrect');
+                }
+            });
+
+            if (answer === q.correct) {
+                quizScore++;
+            }
+            
+            selectedAnswers.push(answer);
+
+            setTimeout(() => {
+                currentQuizIndex++;
+                displayQuiz();
+            }, 1500);
+        }
+
+        function showQuizResults() {
+            const display = document.getElementById('quizDisplay');
+            const percentage = Math.round((quizScore / quizQuestions.length) * 100);
+            const emoji = percentage >= 80 ? '🎉' : percentage >= 60 ? '👏' : percentage >= 40 ? '💪' : '📚';
+            
+            display.innerHTML = `
+                <div class="result-box">
+                    <div class="result-score">${percentage}%</div>
+                    <h3>${emoji} Quiz Complete!</h3>
+                    <p>You got ${quizScore} out of ${quizQuestions.length} correct</p>
+                    <button class="btn btn-success" onclick="restartQuiz()">🔄 Retake Quiz</button>
+                    <button class="btn btn-danger" onclick="clearQuiz()" style="margin-top: 15px;">🗑️ Delete All Questions</button>
+                </div>
+            `;
+        }
+
+        function restartQuiz() {
+            currentQuizIndex = 0;
+            quizScore = 0;
+            selectedAnswers = [];
+            displayQuiz();
+        }
+
+        function clearQuiz() {
+            if (confirm('🗑️ Delete all quiz questions? This cannot be undone.')) {
+                quizQuestions = [];
+                localStorage.setItem('quizQuestions', JSON.stringify(quizQuestions));
+                currentQuizIndex = 0;
+                quizScore = 0;
+                selectedAnswers = [];
+                updateQuestionCount();
+                displayQuiz();
+            }
+        }
+
+        // Initialize
+        updateQuestionCount();
+        displayQuiz();
+    </script>
+</body>
+</html>

@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyHub - Pomodoro Timer</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>📚</text></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Poppins:wght@400;600;700;800&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated Clock Background */
+        .clock-background {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;
+            height: 600px;
+            border: 4px solid rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
+            z-index: 0;
+            opacity: 0.3;
+        }
+
+        .clock-background::before,
+        .clock-background::after {
+            content: '';
+            position: absolute;
+            background: rgba(255, 255, 255, 0.25);
+            border-radius: 10px;
+        }
+
+        .clock-background::before {
+            width: 5px;
+            height: 200px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -100%);
+            animation: rotateMinute 60s linear infinite;
+        }
+
+        .clock-background::after {
+            width: 5px;
+            height: 140px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -100%);
+            animation: rotateHour 3600s linear infinite;
+        }
+
+        @keyframes rotateMinute {
+            to { transform: translate(-50%, -100%) rotate(360deg); }
+        }
+
+        @keyframes rotateHour {
+            to { transform: translate(-50%, -100%) rotate(360deg); }
+        }
+
+        .clock-marks {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .clock-mark {
+            position: absolute;
+            width: 3px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            left: 50%;
+            top: 10px;
+            transform-origin: center 290px;
+        }
+
+        /* Floating particles */
+        .particles {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 0;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            animation: float 20s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0); opacity: 0.3; }
+            25% { transform: translate(100px, -100px); opacity: 0.6; }
+            50% { transform: translate(-50px, -200px); opacity: 0.9; }
+            75% { transform: translate(150px, -50px); opacity: 0.5; }
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .navbar {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            padding: 20px 30px;
+            border-radius: 50px;
+            margin-bottom: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.1rem;
+            font-family: 'Fredoka', sans-serif;
+            transition: all 0.3s;
+            padding: 8px 20px;
+            border-radius: 20px;
+        }
+
+        .navbar a:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .navbar span {
+            color: white;
+            font-size: 1.5rem;
+            font-family: 'Playfair Display', serif;
+            font-weight: 900;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            padding: 40px;
+            border-radius: 30px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .page-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem;
+            color: white;
+            margin-bottom: 15px;
+            font-weight: 900;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .page-description {
+            color: rgba(255, 255, 255, 0.95);
+            font-size: 1.2rem;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 400;
+        }
+
+        .card {
+            background: white;
+            padding: 60px 40px;
+            border-radius: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .mode-buttons {
+            margin-bottom: 40px;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .mode-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 700;
+            font-family: 'Fredoka', sans-serif;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .mode-btn:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .mode-btn.short {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+
+        .mode-btn.short:hover {
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+        }
+
+        .mode-btn.long {
+            background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+        }
+
+        .mode-btn.long:hover {
+            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4);
+        }
+
+        .timer-display {
+            font-family: 'Playfair Display', serif;
+            font-size: 8rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 50px 0;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .timer-display.running {
+            animation: none;
+        }
+
+        .control-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 40px;
+        }
+
+        .btn-control {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 20px 50px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1.3rem;
+            font-weight: 700;
+            font-family: 'Fredoka', sans-serif;
+            transition: all 0.3s;
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-control:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.5);
+        }
+
+        .btn-reset {
+            background: linear-gradient(135deg, #64748b, #475569);
+        }
+
+        .btn-reset:hover {
+            box-shadow: 0 10px 30px rgba(100, 116, 139, 0.4);
+        }
+
+        .stats {
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 3px solid #e2e8f0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-item {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            padding: 20px;
+            border-radius: 20px;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .stat-item p {
+            color: #64748b;
+            font-size: 1rem;
+            margin-bottom: 10px;
+            font-family: 'Fredoka', sans-serif;
+        }
+
+        .stat-item strong {
+            font-family: 'Playfair Display', serif;
+            color: #667eea;
+            font-size: 2rem;
+            font-weight: 900;
+        }
+
+        @media (max-width: 768px) {
+            .timer-display {
+                font-size: 5rem;
+            }
+            
+            .page-title {
+                font-size: 2.5rem;
+            }
+
+            .btn-control {
+                font-size: 1.1rem;
+                padding: 15px 35px;
+            }
+
+            .mode-buttons {
+                flex-direction: column;
+            }
+
+            .mode-btn {
+                width: 100%;
+            }
+
+            .clock-background {
+                width: 400px;
+                height: 400px;
+            }
+
+            .navbar {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="particles" id="particles"></div>
+    <div class="clock-background">
+        <div class="clock-marks" id="clockMarks"></div>
+    </div>
+
+    <div class="container">
+        <div class="navbar">
+     <a href="studyhub-homepage.html">← Back to Home</a>
+            <span>📚 StudyHub</span>
+        </div>
+
+        <div class="header">
+            <h1 class="page-title">Pomodoro Timer 🍅</h1>
+            <p class="page-description">Focus with the Pomodoro Technique - Work in focused intervals</p>
+        </div>
+
+        <div class="card">
+            <div class="mode-buttons">
+                <button class="mode-btn" onclick="setPomodoroMode('work')">🎯 Work (25 min)</button>
+                <button class="mode-btn short" onclick="setPomodoroMode('short')">☕ Short Break (5 min)</button>
+                <button class="mode-btn long" onclick="setPomodoroMode('long')">🌴 Long Break (15 min)</button>
+            </div>
+
+            <div class="timer-display" id="pomodoroDisplay">25:00</div>
+
+            <div class="control-buttons">
+                <button class="btn-control" id="pomodoroToggle" onclick="togglePomodoro()">
+                    ▶️ Start
+                </button>
+                <button class="btn-control btn-reset" onclick="resetPomodoro()">🔄 Reset</button>
+            </div>
+
+            <div class="stats">
+                <div class="stat-item">
+                    <p>🏆 Sessions Today</p>
+                    <strong id="pomodoroSessions">0</strong>
+                </div>
+                <div class="stat-item">
+                    <p>⏰ Total Study Time</p>
+                    <strong id="totalStudyTime">0 min</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Create particles
+        const particlesContainer = document.getElementById('particles');
+        for (let i = 0; i < 30; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.top = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 20 + 's';
+            particle.style.animationDuration = (Math.random() * 15 + 15) + 's';
+            particlesContainer.appendChild(particle);
+        }
+
+        // Create clock marks
+        const clockMarks = document.getElementById('clockMarks');
+        for (let i = 0; i < 12; i++) {
+            const mark = document.createElement('div');
+            mark.className = 'clock-mark';
+            mark.style.transform = `rotate(${i * 30}deg)`;
+            clockMarks.appendChild(mark);
+        }
+
+        // Pomodoro Timer Logic
+        let pomodoroTime = 25 * 60;
+        let pomodoroInterval = null;
+        let pomodoroRunning = false;
+        let pomodoroCount = parseInt(localStorage.getItem('pomodoroCount')) || 0;
+        let studyTime = parseInt(localStorage.getItem('studyTime')) || 0;
+
+        function setPomodoroMode(mode) {
+            clearInterval(pomodoroInterval);
+            pomodoroRunning = false;
+            document.getElementById('pomodoroToggle').innerHTML = '▶️ Start';
+            document.getElementById('pomodoroDisplay').classList.remove('running');
+
+            if (mode === 'work') {
+                pomodoroTime = 25 * 60;
+            } else if (mode === 'short') {
+                pomodoroTime = 5 * 60;
+            } else if (mode === 'long') {
+                pomodoroTime = 15 * 60;
+            }
+
+            updatePomodoroDisplay();
+        }
+
+        function togglePomodoro() {
+            if (pomodoroRunning) {
+                clearInterval(pomodoroInterval);
+                pomodoroRunning = false;
+                document.getElementById('pomodoroToggle').innerHTML = '▶️ Start';
+                document.getElementById('pomodoroDisplay').classList.remove('running');
+            } else {
+                pomodoroRunning = true;
+                document.getElementById('pomodoroToggle').innerHTML = '⏸️ Pause';
+                document.getElementById('pomodoroDisplay').classList.add('running');
+                
+                pomodoroInterval = setInterval(() => {
+                    pomodoroTime--;
+                    updatePomodoroDisplay();
+
+                    if (pomodoroTime <= 0) {
+                        clearInterval(pomodoroInterval);
+                        pomodoroRunning = false;
+                        document.getElementById('pomodoroToggle').innerHTML = '▶️ Start';
+                        document.getElementById('pomodoroDisplay').classList.remove('running');
+                        
+                        pomodoroCount++;
+                        studyTime += 25;
+                        localStorage.setItem('pomodoroCount', pomodoroCount);
+                        localStorage.setItem('studyTime', studyTime);
+                        
+                        document.getElementById('pomodoroSessions').textContent = pomodoroCount;
+                        document.getElementById('totalStudyTime').textContent = studyTime + ' min';
+                        
+                        alert('🎉 Pomodoro session complete! Great work! Take a break.');
+                        
+                        try {
+                            new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYHGGS67+ibUBELTKXh8bllHgU2jdXzzn0vBSh+zPDckUMKEl+16+qnVRUKQ5zd8sFuIwUqgc3y2oc3Bxhmve7mnVARDEyh4PG5ZB0FNo3V886ALgUnfczw3Y9DCxFftOvqp1QTCkOc3fO/biMFK4DN8tmHNgcYZ73u5p1PEQxMoeDxuWQdBTaM1fPPgC4FJ3zM8N2PTAsRX7Tr6qdVFApDnN3zv24jBSt/zfLZhzYHGGe97uadTxEMTKHg8bllHQU2jNXzzoAuBSd8zPDdj0wLEV+06+qnVRQKQ5zd86BvIwUrfs3y2Yc2Bxhnve7mnU8RDEyh4PG5ZR0FNozV884ALgUnfMzw3I9MCxBftOvqp1UUCkOc3fO/biMFK37N8tmHNgcYZ73u5p1PEQxMoeDxuWQdBTaM1fPPgC4FJ3zM8NyPTAsQX7Tr6qdVFApDnN3zv24jBSt+zfLZhzYHGGe97uadTxEMTKHg8bllHQU2jdXzzoAuBSd8zPDcj0wLEF+06+qnVRQKQ5zd8r5uIwUrfs3y2Yc2Bxhnve7mnU8RDEyh4PG5ZR0FNozV886ALgUnfMzw3I9MCxBftOvqp1UUCkOc3fO+biMFK37N8tmHNgcYZ73u5p1PEQxMoeDxuWUdBTaM1fPOgC4FJ3zM8NyPTAsQX7Tr6qdVFApDnN3zvm4jBSt+zfLZhzYHGGe97uadTxEMTKHg8bllHQU2jdXzzoAuBSd8zPDcj0wLEF+06+qnVRQKQ5zd875uIwUrfs3y2Yc2Bxhnve7mnU8RDEyh4PG5ZR0FNozV886ALgUnfMzw3I9MCxBftOvqp1UUCkOc3fO+biMFK37N8tmHNgcYZ73u5p1PEQxMoeDxuWUdBTaM1fPOgC4FJ3zM8NyPTAsQX7Tr6qdVFApDnN3zvm4jBSt+zfLZhzYHGGe97uadTxEMTKHg8bllHQU2jNXzzoAuBSd8zPDcj0wLEF+06+qnVRQKQ5zd875uIwUqfs3y2Yc2Bxhnve7mnU8RDEyh4PG5ZR0FNozV886ALgUnfMzw3I9MCxBftOvqp1UUCkOc3fO+biMFK37N8tmHNgcYZ73u5p1PEQxMoeDxuWUdBTaM1fPOgC4FJ3zM8NyPTAsQX7Tr6qZVFApDnN3zvm4jBSt+zfLZhzYHGGe97uadTxEMTKHg8bllHQU2jNXzzoAuBSd8zPDcj0wLEF+06+qmVRQKQ5zd875uIwUrfs3y2Yc2Bxhnve7mnU8RDEyh4PG5ZR0FNozV886ALgUnfMzw3I9MCxBftOvqplUUCkOc3fO+biMFK37N8tmHNgcYZ73u5p1PEQxMoeDxuWUdBTaM1fPOgC4FJ3zM8NyPTAsQX7Tr6qZVFApDnN3zvm4jBSt+zfLZhzYHGGe97uadTxEMTKHg8bllHQU2jNXzzoAuBSd8zPDcj0wLEF+06+qmVRQKQ5zd875uIwUrfs3y2Yc2Bxhnve7mnU8RDEyh4PG5ZR0FNozV886ALgUnfMzw3I9MCxBftOvqplUUCkOc3fO+biMFK37N8tmHNgcYZ73u5p1PEQxMoeDxuWUdBTaM1fPOgC4FJ3zM8NyPTAsQX7Tr6qZVFApDnN3zvm4jBSt+zfLZhzYHGGe97uadTxEMTKHg8bllHQU2jNXz').play();
+                        } catch (e) {}
+                    }
+                }, 1000);
+            }
+        }
+
+        function resetPomodoro() {
+            clearInterval(pomodoroInterval);
+            pomodoroRunning = false;
+            pomodoroTime = 25 * 60;
+            document.getElementById('pomodoroToggle').innerHTML = '▶️ Start';
+            document.getElementById('pomodoroDisplay').classList.remove('running');
+            updatePomodoroDisplay();
+        }
+
+        function updatePomodoroDisplay() {
+            const mins = Math.floor(pomodoroTime / 60);
+            const secs = pomodoroTime % 60;
+            document.getElementById('pomodoroDisplay').textContent =
+                `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        // Initialize
+        document.getElementById('pomodoroSessions').textContent = pomodoroCount;
+        document.getElementById('totalStudyTime').textContent = studyTime + ' min';
+    </script>
+</body>
+</html>

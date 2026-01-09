@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyHub - Feynman Method</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>📚</text></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Poppins:wght@400;600;700;800&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated background with glassy lightbulbs */
+        .bg-glass-bulbs {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .glass-bulb {
+            position: absolute;
+            width: 90px;
+            height: 110px;
+            background: rgba(255, 255, 255, 0.07);
+            backdrop-filter: blur(12px);
+            border-radius: 45% 45% 50% 50% / 60% 60% 40% 40%;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            animation: float-glow 15s infinite ease-in-out;
+            box-shadow: 0 8px 32px rgba(255, 255, 255, 0.12);
+        }
+
+        .glass-bulb::before {
+            content: '💡';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2.5rem;
+            animation: glow-pulse 3s infinite ease-in-out;
+        }
+
+        @keyframes float-glow {
+            0%, 100% { 
+                transform: translateY(0) rotate(0deg);
+                opacity: 0.4;
+            }
+            50% { 
+                transform: translateY(-30px) rotate(10deg);
+                opacity: 0.7;
+            }
+        }
+
+        @keyframes glow-pulse {
+            0%, 100% { opacity: 0.3; filter: brightness(1); }
+            50% { opacity: 0.7; filter: brightness(1.5); }
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Floating Navigation */
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px 35px;
+            border-radius: 50px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
+        }
+
+        .navbar:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.25);
+        }
+
+        .navbar a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.1rem;
+            font-family: 'Fredoka', sans-serif;
+            transition: all 0.3s;
+            padding: 10px 20px;
+            border-radius: 25px;
+        }
+
+        .navbar a:hover {
+            background: #667eea;
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .navbar .brand {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: #1e3a8a;
+        }
+
+        /* Hero Header */
+        .header {
+            background: white;
+            padding: 50px;
+            border-radius: 30px;
+            margin-bottom: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transform: rotate(1deg);
+            transition: all 0.4s;
+        }
+
+        .header:hover {
+            transform: rotate(0deg) scale(1.02);
+            box-shadow: 0 25px 70px rgba(102, 126, 234, 0.3);
+        }
+
+        .header::before {
+            content: '💡';
+            position: absolute;
+            font-size: 5rem;
+            top: 10px;
+            right: 20px;
+            animation: idea-flash 4s infinite ease-in-out;
+        }
+
+        @keyframes idea-flash {
+            0%, 100% { 
+                opacity: 0.3; 
+                filter: brightness(1);
+                transform: scale(1);
+            }
+            50% { 
+                opacity: 1; 
+                filter: brightness(1.8) drop-shadow(0 0 20px #fbbf24);
+                transform: scale(1.15);
+            }
+        }
+
+        .page-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 900;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 15px;
+        }
+
+        .page-description {
+            font-family: 'Fredoka', sans-serif;
+            color: #64748b;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        /* Info Box */
+        .info-box {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border-left: 6px solid #f59e0b;
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 35px;
+            box-shadow: 0 10px 30px rgba(245, 158, 11, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .info-box::before {
+            content: '✨';
+            position: absolute;
+            font-size: 8rem;
+            opacity: 0.08;
+            top: -20px;
+            right: -10px;
+            animation: sparkle-rotate 20s linear infinite;
+        }
+
+        @keyframes sparkle-rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .info-box h4 {
+            font-family: 'Fredoka', sans-serif;
+            color: #92400e;
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+        }
+
+        .info-box p {
+            color: #78350f;
+            line-height: 1.8;
+            font-size: 1.05rem;
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            padding: 45px;
+            border-radius: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            transition: all 0.4s;
+            margin-bottom: 30px;
+            transform: rotate(-0.5deg);
+        }
+
+        .card:hover {
+            transform: rotate(0deg) translateY(-5px);
+            box-shadow: 0 25px 70px rgba(102, 126, 234, 0.3);
+        }
+
+        .card-title {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Step Cards */
+        .step-card {
+            background: linear-gradient(135deg, #f8fafc, #e0e7ff);
+            padding: 35px;
+            border-radius: 25px;
+            margin-bottom: 25px;
+            border-left: 6px solid #667eea;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.1);
+            transition: all 0.3s;
+        }
+
+        .step-card:hover {
+            transform: translateX(10px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.2);
+        }
+
+        .step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 50%;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .step-title {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 12px;
+        }
+
+        .step-description {
+            color: #64748b;
+            line-height: 1.7;
+            font-size: 1.05rem;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 12px;
+            font-weight: 700;
+            color: #334155;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.05rem;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 18px 25px;
+            border: 3px solid #e2e8f0;
+            border-radius: 20px;
+            font-size: 1.05rem;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.3s;
+            background: #f8fafc;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.2);
+        }
+
+        .form-group textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        /* Button Styles */
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 1.15rem;
+            font-weight: 700;
+            font-family: 'Fredoka', sans-serif;
+            transition: all 0.3s;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:hover::before {
+            width: 400px;
+            height: 400px;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            padding: 12px 24px;
+            font-size: 0.95rem;
+            width: auto;
+        }
+
+        /* Concept Items */
+        .concept-item {
+            background: linear-gradient(135deg, #fffbeb, #fef3c7);
+            padding: 30px;
+            border-radius: 25px;
+            margin-bottom: 20px;
+            border-left: 6px solid #f59e0b;
+            box-shadow: 0 10px 30px rgba(245, 158, 11, 0.15);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .concept-item::before {
+            content: '💡';
+            position: absolute;
+            font-size: 5rem;
+            opacity: 0.08;
+            top: 10px;
+            right: 20px;
+        }
+
+        .concept-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(245, 158, 11, 0.25);
+        }
+
+        .concept-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .concept-title {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #92400e;
+            flex: 1;
+        }
+
+        .concept-explanation {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            color: #334155;
+            line-height: 1.8;
+            box-shadow: 0 5px 15px rgba(245, 158, 11, 0.1);
+        }
+
+        .concept-count {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-weight: 700;
+            color: #667eea;
+            font-family: 'Fredoka', sans-serif;
+        }
+
+        .concept-count span {
+            font-size: 1.4rem;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 80px 40px;
+        }
+
+        .empty-state-icon {
+            font-size: 6rem;
+            margin-bottom: 25px;
+            opacity: 0.4;
+            animation: idea-blink 3s ease-in-out infinite;
+        }
+
+        @keyframes idea-blink {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 0.8; filter: brightness(1.5); }
+        }
+
+        .empty-state p {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #64748b;
+            line-height: 1.6;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 15px 25px;
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .header {
+                padding: 35px 25px;
+            }
+
+            .card {
+                padding: 30px 20px;
+            }
+
+            .concept-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .concept-item,
+            .step-card {
+                padding: 25px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Background with Glassy Lightbulbs -->
+    <div class="bg-glass-bulbs">
+        <div class="glass-bulb" style="top: 8%; left: 8%; animation-delay: 0s;"></div>
+        <div class="glass-bulb" style="top: 55%; right: 10%; animation-delay: 3s;"></div>
+        <div class="glass-bulb" style="bottom: 15%; left: 12%; animation-delay: 6s;"></div>
+        <div class="glass-bulb" style="top: 30%; right: 25%; animation-delay: 9s;"></div>
+        <div class="glass-bulb" style="bottom: 35%; left: 40%; animation-delay: 12s;"></div>
+    </div>
+
+    <div class="container">
+        <!-- Navigation -->
+        <nav class="navbar">
+     <a href="studyhub-homepage.html">← Back to Home</a>
+            <span class="brand">📚 StudyHub</span>
+        </nav>
+
+        <!-- Header -->
+        <div class="header">
+            <h1 class="page-title">Feynman Method 💡</h1>
+            <p class="page-description">Learn by teaching in simple terms</p>
+        </div>
+
+        <!-- Info Box -->
+        <div class="info-box">
+            <h4>💡 What is the Feynman Technique?</h4>
+            <p>Named after physicist Richard Feynman, this method helps you learn deeply by explaining concepts in simple terms. If you can't explain it simply, you don't understand it well enough!</p>
+        </div>
+
+        <!-- Steps Card -->
+        <div class="card">
+            <h3 class="card-title">📖 The Four Steps</h3>
+            
+            <div class="step-card">
+                <div class="step-number">1</div>
+                <div class="step-title">Choose a Concept</div>
+                <div class="step-description">Pick a topic or concept you want to understand better.</div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-number">2</div>
+                <div class="step-title">Explain it Simply</div>
+                <div class="step-description">Write it out as if you're teaching it to a child. Use simple language and avoid jargon.</div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-number">3</div>
+                <div class="step-title">Identify Gaps</div>
+                <div class="step-description">Notice where you struggle to explain. These are your knowledge gaps.</div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-number">4</div>
+                <div class="step-title">Review & Simplify</div>
+                <div class="step-description">Go back to your sources, fill the gaps, and simplify your explanation further.</div>
+            </div>
+        </div>
+
+        <!-- Create Concept Card -->
+        <div class="card">
+            <h3 class="card-title">✏️ Create Your Explanation</h3>
+            <div class="form-group">
+                <label>💭 Concept/Topic</label>
+                <input type="text" id="conceptTitle" placeholder="e.g., Photosynthesis, Newton's Laws, Quadratic Equations">
+            </div>
+            <div class="form-group">
+                <label>📝 Simple Explanation (Teach it to a 10-year-old)</label>
+                <textarea id="conceptExplanation" placeholder="Explain the concept in the simplest terms possible..."></textarea>
+            </div>
+            <button class="btn" onclick="addConcept()">💾 Save Explanation</button>
+        </div>
+
+        <!-- Concepts List Card -->
+        <div class="card">
+            <h3 class="card-title">
+                📚 My Concepts 
+                <span class="concept-count">
+                    <span id="conceptCount">0</span> total
+                </span>
+            </h3>
+            <div id="conceptList"></div>
+        </div>
+    </div>
+
+    <script>
+        let concepts = JSON.parse(localStorage.getItem('feynmanConcepts')) || [];
+
+        function addConcept() {
+            const concept = {
+                title: document.getElementById('conceptTitle').value.trim(),
+                explanation: document.getElementById('conceptExplanation').value.trim(),
+                id: Date.now(),
+                created: new Date().toLocaleDateString()
+            };
+
+            if (concept.title && concept.explanation) {
+                concepts.push(concept);
+                localStorage.setItem('feynmanConcepts', JSON.stringify(concepts));
+                
+                document.getElementById('conceptTitle').value = '';
+                document.getElementById('conceptExplanation').value = '';
+                
+                // Visual feedback
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = '✅ Saved!';
+                btn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+                
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = 'linear-gradient(135deg, #667eea, #764ba2)';
+                }, 2000);
+                
+                displayConcepts();
+            } else {
+                alert('⚠️ Please fill in both the concept and explanation!');
+            }
+        }
+
+        function displayConcepts() {
+            const list = document.getElementById('conceptList');
+            document.getElementById('conceptCount').textContent = concepts.length;
+
+            if (concepts.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">💡</div>
+                        <p>No concepts yet.<br>Start explaining your first concept!</p>
+                    </div>
+                `;
+            } else {
+                list.innerHTML = concepts.map((concept, i) => `
+                    <div class="concept-item">
+                        <div class="concept-header">
+                            <div class="concept-title">💡 ${concept.title}</div>
+                            <button class="btn btn-danger" onclick="deleteConcept(${i})">🗑️ Delete</button>
+                        </div>
+                        <div class="concept-explanation">${concept.explanation}</div>
+                        <div style="margin-top: 15px; color: #92400e; font-size: 0.9rem; font-style: italic;">
+                            Created: ${concept.created}
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function deleteConcept(index) {
+            if (confirm('🗑️ Delete this concept? This cannot be undone.')) {
+                concepts.splice(index, 1);
+                localStorage.setItem('feynmanConcepts', JSON.stringify(concepts));
+                displayConcepts();
+            }
+        }
+
+        // Initialize
+        displayConcepts();
+    </script>
+</body>
+</html>

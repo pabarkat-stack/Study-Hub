@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyHub - Dashboard</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>📚</text></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Poppins:wght@400;600;700;800&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            scroll-snap-type: y mandatory;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+        }
+
+        section {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 80px 20px;
+            scroll-snap-align: start;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Floating Navigation */
+        .top-nav {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px 30px;
+            border-radius: 50px;
+            box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+            display: flex;
+            gap: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+        }
+
+        .nav-links a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.9rem;
+            font-family: 'Fredoka', sans-serif;
+            transition: all 0.3s;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+
+        .nav-links a:hover {
+            background: #667eea;
+            color: white;
+            transform: scale(1.1) rotate(-2deg);
+        }
+
+        .nav-links a.active-nav {
+            background: #667eea;
+            color: white;
+        }
+
+        /* Pagination Controls */
+        .pagination-controls {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px 30px;
+            border-radius: 50px;
+            box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .page-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .page-btn:hover:not(:disabled) {
+            background: #764ba2;
+            transform: scale(1.1);
+        }
+
+        .page-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .page-indicator {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .page-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ddd;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .page-dot.active {
+            background: #667eea;
+            transform: scale(1.5);
+        }
+
+        .page-dot:hover {
+            background: #764ba2;
+            transform: scale(1.3);
+        }
+
+        .page-number {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #667eea;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        /* Scroll Progress Indicator */
+        .scroll-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            z-index: 1001;
+            transition: width 0.1s ease;
+        }
+
+        .container {
+            max-width: 1300px;
+            width: 100%;
+            z-index: 1;
+        }
+
+        /* Section 1 - Stats */
+        #stats {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: relative;
+        }
+
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(60px);
+            opacity: 0.4;
+            animation: blob 7s infinite;
+        }
+
+        .blob1 {
+            width: 300px;
+            height: 300px;
+            background: rgba(255, 255, 255, 0.3);
+            top: 10%;
+            left: 10%;
+        }
+
+        .blob2 {
+            width: 400px;
+            height: 400px;
+            background: rgba(255, 255, 255, 0.2);
+            bottom: 10%;
+            right: 10%;
+            animation-delay: 2s;
+        }
+
+        .blob3 {
+            width: 250px;
+            height: 250px;
+            background: rgba(118, 75, 162, 0.4);
+            top: 50%;
+            left: 50%;
+            animation-delay: 4s;
+        }
+
+        @keyframes blob {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+        }
+
+        .hero-playful {
+            text-align: center;
+            color: white;
+            margin-bottom: 60px;
+        }
+
+        .hero-playful h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(3rem, 10vw, 7rem);
+            font-weight: 900;
+            margin-bottom: 20px;
+            text-shadow: 5px 5px 0 rgba(0, 0, 0, 0.2);
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .subtitle-playful {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .stats-colorful {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 30px;
+        }
+
+        .stat-bubble {
+            background: white;
+            padding: 40px;
+            border-radius: 30px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            transform: rotate(-2deg);
+            transition: all 0.3s;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .stat-bubble:nth-child(2) {
+            transform: rotate(2deg);
+            animation-delay: 0.5s;
+        }
+
+        .stat-bubble:nth-child(3) {
+            transform: rotate(-3deg);
+            animation-delay: 1s;
+        }
+
+        .stat-bubble:nth-child(4) {
+            transform: rotate(1deg);
+            animation-delay: 1.5s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(-2deg); }
+            50% { transform: translateY(-15px) rotate(-2deg); }
+        }
+
+        .stat-bubble:hover {
+            transform: rotate(0deg) scale(1.1);
+            box-shadow: 0 30px 80px rgba(102, 126, 234, 0.4);
+        }
+
+        .stat-value-fun {
+            font-family: 'Playfair Display', serif;
+            font-size: 4rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label-fun {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1rem;
+            color: #666;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-top: 10px;
+        }
+
+        /* Section 2 - Learning */
+        #learning {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.7);
+            animation: confettiFall 5s linear infinite;
+        }
+
+        @keyframes confettiFall {
+            to {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .section-title-fun {
+            font-family: 'Playfair Display', serif;
+            text-align: center;
+            font-size: clamp(2.5rem, 7vw, 5rem);
+            font-weight: 900;
+            color: white;
+            margin-bottom: 60px;
+            text-shadow: 4px 4px 0 rgba(0, 0, 0, 0.2);
+        }
+
+        .tools-bouncy {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+        }
+
+        .tool-bouncy {
+            background: white;
+            padding: 40px 30px;
+            border-radius: 25px;
+            text-decoration: none;
+            color: #333;
+            display: block;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s;
+            border: 5px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tool-bouncy::before {
+            content: '✨';
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 1.5rem;
+            opacity: 0;
+            transition: all 0.3s;
+        }
+
+        .tool-bouncy:hover::before {
+            opacity: 1;
+            transform: rotate(20deg);
+        }
+
+        .tool-bouncy:hover {
+            transform: translateY(-15px) rotate(2deg);
+            box-shadow: 0 25px 60px rgba(102, 126, 234, 0.3);
+            border-color: rgba(102, 126, 234, 0.3);
+        }
+
+        .tool-icon-fun {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            display: block;
+            animation: wiggle 1s ease-in-out infinite;
+        }
+
+        @keyframes wiggle {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-5deg); }
+            75% { transform: rotate(5deg); }
+        }
+
+        .tool-bouncy:hover .tool-icon-fun {
+            animation: spin 0.5s ease-in-out;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(180deg) scale(1.2); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
+
+        .tool-title-fun {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #667eea;
+        }
+
+        .tool-desc-fun {
+            font-family: 'Poppins', sans-serif;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        /* Section 3 - Time */
+        #time {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .stars {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .star {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 1; }
+        }
+
+        /* Section 4 - Planning */
+        #planning {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        }
+
+        .rainbow-bg {
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, rgba(102, 126, 234, 0.3), rgba(118, 75, 162, 0.3), rgba(255, 255, 255, 0.2));
+            background-size: 400% 400%;
+            animation: rainbow 15s ease infinite;
+            opacity: 0.5;
+            filter: blur(100px);
+        }
+
+        @keyframes rainbow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .cards-mega {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 40px;
+        }
+
+        .card-mega {
+            background: white;
+            padding: 60px 40px;
+            border-radius: 30px;
+            text-decoration: none;
+            color: #333;
+            display: block;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            transition: all 0.4s;
+            border: 6px solid;
+            position: relative;
+        }
+
+        .card-mega:nth-child(1) {
+            border-color: #667eea;
+            transform: rotate(-1deg);
+        }
+
+        .card-mega:nth-child(2) {
+            border-color: #764ba2;
+            transform: rotate(1deg);
+        }
+
+        .card-mega:hover {
+            transform: rotate(0deg) scale(1.05);
+            box-shadow: 0 30px 80px rgba(102, 126, 234, 0.4);
+        }
+
+        .card-emoji-mega {
+            font-size: 5rem;
+            display: block;
+            margin-bottom: 30px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .card-title-mega {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin-bottom: 20px;
+            color: #667eea;
+        }
+
+        .card-desc-mega {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.1rem;
+            color: #666;
+            line-height: 1.8;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .stats-colorful,
+            .tools-bouncy,
+            .cards-mega {
+                grid-template-columns: 1fr;
+            }
+
+            .top-nav {
+                padding: 10px 20px;
+                gap: 15px;
+            }
+
+            .nav-links {
+                gap: 10px;
+            }
+
+            .nav-links a {
+                font-size: 0.75rem;
+                padding: 6px 10px;
+            }
+
+            .pagination-controls {
+                padding: 10px 20px;
+                gap: 15px;
+            }
+
+            .page-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 1.2rem;
+            }
+
+            .page-number {
+                font-size: 0.85rem;
+                min-width: 50px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Scroll Progress Bar -->
+    <div class="scroll-progress" id="scrollProgress"></div>
+
+    <!-- Navigation -->
+    <nav class="top-nav">
+        <div class="nav-links">
+            <a href="#stats" class="nav-link">📊 Stats</a>
+            <a href="#learning" class="nav-link">🎓 Learning</a>
+            <a href="#time" class="nav-link">⏰ Time</a>
+            <a href="#planning" class="nav-link">📅 Planning</a>
+        </div>
+    </nav>
+
+    <!-- Pagination Controls -->
+    <div class="pagination-controls">
+        <button class="page-btn" id="prevBtn" onclick="scrollToSection(-1)">←</button>
+        
+        <div class="page-indicator">
+            <span class="page-dot" onclick="scrollToSectionIndex(0)"></span>
+            <span class="page-dot" onclick="scrollToSectionIndex(1)"></span>
+            <span class="page-dot" onclick="scrollToSectionIndex(2)"></span>
+            <span class="page-dot" onclick="scrollToSectionIndex(3)"></span>
+        </div>
+        
+        <span class="page-number" id="pageNumber">1 / 4</span>
+        
+        <button class="page-btn" id="nextBtn" onclick="scrollToSection(1)">→</button>
+    </div>
+
+    <!-- Section 1: Stats -->
+    <section id="stats">
+        <div class="blob blob1"></div>
+        <div class="blob blob2"></div>
+        <div class="blob blob3"></div>
+        <div class="container">
+            <div class="hero-playful">
+                <h1>📚 StudyHub</h1>
+                <p class="subtitle-playful">Your Awesome Study Companion! 🚀</p>
+            </div>
+            
+            <div class="stats-colorful">
+                <div class="stat-bubble">
+                    <div class="stat-value-fun" id="totalFlashcards">0</div>
+                    <div class="stat-label-fun">🎴 Flashcards</div>
+                </div>
+                <div class="stat-bubble">
+                    <div class="stat-value-fun" id="totalTasks">0</div>
+                    <div class="stat-label-fun">✅ Tasks</div>
+                </div>
+                <div class="stat-bubble">
+                    <div class="stat-value-fun" id="totalHours">0h</div>
+                    <div class="stat-label-fun">⏱️ Study Time</div>
+                </div>
+                <div class="stat-bubble">
+                    <div class="stat-value-fun" id="streak">0</div>
+                    <div class="stat-label-fun">🔥 Day Streak</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 2: Learning Tools -->
+    <section id="learning">
+        <div id="confettiContainer"></div>
+        <div class="container">
+            <h2 class="section-title-fun">🎓 Learning Tools</h2>
+            
+            <div class="tools-bouncy">
+                <a href="flashcards-purple-design.html" class="tool-bouncy">
+                    <span class="tool-icon-fun">🎴</span>
+                    <div class="tool-title-fun">Flashcards</div>
+                    <div class="tool-desc-fun">Create and study flashcards with active recall</div>
+                </a>
+                <a href="studyhub_cornell_elegant.html" class="tool-bouncy">
+                    <span class="tool-icon-fun">📝</span>
+                    <div class="tool-title-fun">Cornell Notes</div>
+                    <div class="tool-desc-fun">Take organized notes with the Cornell method</div>
+                </a>
+                <a href="studyhub_feynman_elegant.html" class="tool-bouncy">
+                    <span class="tool-icon-fun">💡</span>
+                    <div class="tool-title-fun">Feynman Method</div>
+                    <div class="tool-desc-fun">Learn by teaching in simple terms</div>
+                </a>
+                <a href="mindmap-purple-design.html" class="tool-bouncy">
+                    <span class="tool-icon-fun">🧠</span>
+                    <div class="tool-title-fun">Mind Map</div>
+                    <div class="tool-desc-fun">Visualize connections between ideas</div>
+                </a>
+                <a href="studyhub_quiz_elegant.html" class="tool-bouncy">
+                    <span class="tool-icon-fun">❓</span>
+                    <div class="tool-title-fun">Quiz Maker</div>
+                    <div class="tool-desc-fun">Test your knowledge with custom quizzes</div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 3: Time Management -->
+    <section id="time">
+        <div class="stars" id="starsContainer"></div>
+        <div class="container">
+            <h2 class="section-title-fun">⏰ Time Management</h2>
+            
+            <div class="tools-bouncy">
+                <a href="pomodoro-purple-design.html" class="tool-bouncy">
+                    <span class="tool-icon-fun">🍅</span>
+                    <div class="tool-title-fun">Pomodoro Timer</div>
+                    <div class="tool-desc-fun">Focus with the Pomodoro Technique</div>
+                </a>
+                <a href="studyhub_eisenhower_elegant.html" class="tool-bouncy">
+                    <span class="tool-icon-fun">📊</span>
+                    <div class="tool-title-fun">Eisenhower Matrix</div>
+                    <div class="tool-desc-fun">Prioritize tasks by urgency and importance</div>
+                </a>
+                <a href="studyhub_todo_elegant.html" class="tool-bouncy">
+                    <span class="tool-icon-fun">✅</span>
+                    <div class="tool-title-fun">To-Do List</div>
+                    <div class="tool-desc-fun">Manage your daily tasks efficiently</div>
+                </a>
+                <a href="studyhub_habits_elegant.html" class="tool-bouncy">
+                    <span class="tool-icon-fun">⭐</span>
+                    <div class="tool-title-fun">Habit Tracker</div>
+                    <div class="tool-desc-fun">Build positive habits daily</div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 4: Planning -->
+    <section id="planning">
+        <div class="rainbow-bg"></div>
+        <div class="container">
+            <h2 class="section-title-fun">📅 Planning</h2>
+            
+            <div class="cards-mega">
+                <a href="studyhub_calendar_elegant.html" class="card-mega">
+                    <span class="card-emoji-mega">📆</span>
+                    <div class="card-title-mega">Calendar</div>
+                    <div class="card-desc-mega">Plan your study schedule and manage your time effectively</div>
+                </a>
+                <a href="studyhub_goals_elegant.html" class="card-mega">
+                    <span class="card-emoji-mega">🎯</span>
+                    <div class="card-title-mega">SMART Goals</div>
+                    <div class="card-desc-mega">Set and track your goals with proven methodology</div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        const sections = ['stats', 'learning', 'time', 'planning'];
+        let currentSectionIndex = 0;
+
+        // Create confetti
+        const confettiContainer = document.getElementById('confettiContainer');
+        for (let i = 0; i < 30; i++) {
+            const confetti = document.createElement('div');
+            confetti.className = 'confetti';
+            confetti.style.left = Math.random() * 100 + '%';
+            confetti.style.animationDelay = Math.random() * 5 + 's';
+            confetti.style.animationDuration = (Math.random() * 3 + 3) + 's';
+            confettiContainer.appendChild(confetti);
+        }
+
+        // Create stars
+        const starsContainer = document.getElementById('starsContainer');
+        for (let i = 0; i < 50; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = Math.random() * 100 + '%';
+            star.style.animationDelay = Math.random() * 3 + 's';
+            starsContainer.appendChild(star);
+        }
+
+        // Update active indicators based on scroll position
+        function updateActiveSection() {
+            const scrollPosition = window.scrollY + window.innerHeight / 2;
+            
+            sections.forEach((sectionId, index) => {
+                const section = document.getElementById(sectionId);
+                const sectionTop = section.offsetTop;
+                const sectionBottom = sectionTop + section.offsetHeight;
+                
+                if (scrollPosition >= sectionTop && scrollPosition < sectionBottom) {
+                    currentSectionIndex = index;
+                }
+            });
+
+            // Update navigation
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach((link, index) => {
+                link.classList.toggle('active-nav', index === currentSectionIndex);
+            });
+
+            // Update dots
+            const dots = document.querySelectorAll('.page-dot');
+            dots.forEach((dot, index) => {
+                dot.classList.toggle('active', index === currentSectionIndex);
+            });
+
+            // Update page number
+            document.getElementById('pageNumber').textContent = `${currentSectionIndex + 1} / 4`;
+
+            // Update buttons
+            document.getElementById('prevBtn').disabled = currentSectionIndex === 0;
+            document.getElementById('nextBtn').disabled = currentSectionIndex === 3;
+
+            // Update scroll progress
+            const scrollProgress = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
+            document.getElementById('scrollProgress').style.width = scrollProgress + '%';
+        }
+
+        // Scroll to specific section by direction
+        function scrollToSection(direction) {
+            const newIndex = currentSectionIndex + direction;
+            if (newIndex >= 0 && newIndex < sections.length) {
+                document.getElementById(sections[newIndex]).scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        // Scroll to specific section by index
+        function scrollToSectionIndex(index) {
+            if (index >= 0 && index < sections.length) {
+                document.getElementById(sections[index]).scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+                e.preventDefault();
+                scrollToSection(1);
+            } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+                e.preventDefault();
+                scrollToSection(-1);
+            } else if (e.key >= '1' && e.key <= '4') {
+                scrollToSectionIndex(parseInt(e.key) - 1);
+            }
+        });
+
+        // Listen for scroll events
+        window.addEventListener('scroll', updateActiveSection);
+        window.addEventListener('load', updateActiveSection);
+
+        // Touch/Swipe support
+        let touchStartY = 0;
+        let touchEndY = 0;
+
+        document.addEventListener('touchstart', (e) => {
+            touchStartY = e.changedTouches[0].screenY;
+        });
+
+        document.addEventListener('touchend', (e) => {
+            touchEndY = e.changedTouches[0].screenY;
+            handleSwipe();
+        });
+
+        function handleSwipe() {
+            const swipeThreshold = 50;
+            if (touchStartY - touchEndY > swipeThreshold) {
+                scrollToSection(1);
+            } else if (touchEndY - touchStartY > swipeThreshold) {
+                scrollToSection(-1);
+            }
+        }
+
+        // Count up animation
+        function animateValue(id, start, end, duration, suffix = '') {
+            const obj = document.getElementById(id);
+            const range = end - start;
+            const increment = range / (duration / 16);
+            let current = start;
+
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= end) {
+                    current = end;
+                    clearInterval(timer);
+                }
+                obj.textContent = Math.floor(current) + suffix;
+            }, 16);
+        }
+
+        function loadStats() {
+            const flashcards = JSON.parse(localStorage.getItem('flashcards')) || [];
+            const todos = JSON.parse(localStorage.getItem('todos')) || [];
+            const studyTime = parseInt(localStorage.getItem('studyTime')) || 0;
+            const pomodoroCount = parseInt(localStorage.getItem('pomodoroCount')) || 0;
+
+            setTimeout(() => {
+                animateValue('totalFlashcards', 0, flashcards.length, 1500);
+                animateValue('totalTasks', 0, todos.length, 1500);
+                animateValue('totalHours', 0, Math.floor(studyTime / 60), 1500, 'h');
+                animateValue('streak', 0, pomodoroCount, 1500);
+            }, 500);
+        }
+
+        loadStats();
+    </script>
+</body>
+</html>

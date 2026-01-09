@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyHub - Flashcards</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>📚</text></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Poppins:wght@400;600;700;800&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Floating Cards Background */
+        .floating-cards-bg {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .bg-card {
+            position: absolute;
+            width: 120px;
+            height: 160px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            animation: floatCard 20s infinite ease-in-out;
+        }
+
+        @keyframes floatCard {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); opacity: 0.3; }
+            25% { transform: translate(50px, -100px) rotate(10deg); opacity: 0.5; }
+            50% { transform: translate(-30px, -180px) rotate(-5deg); opacity: 0.7; }
+            75% { transform: translate(80px, -80px) rotate(15deg); opacity: 0.4; }
+        }
+
+        /* Particles */
+        .particles {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 0;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            animation: float 20s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0); opacity: 0.3; }
+            50% { transform: translate(-50px, -200px); opacity: 0.8; }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .navbar {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            padding: 20px 30px;
+            border-radius: 50px;
+            margin-bottom: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.1rem;
+            font-family: 'Fredoka', sans-serif;
+            transition: all 0.3s;
+            padding: 8px 20px;
+            border-radius: 20px;
+        }
+
+        .navbar a:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .navbar span {
+            color: white;
+            font-size: 1.5rem;
+            font-family: 'Playfair Display', serif;
+            font-weight: 900;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            padding: 40px;
+            border-radius: 30px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .page-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem;
+            color: white;
+            margin-bottom: 15px;
+            font-weight: 900;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .page-description {
+            color: rgba(255, 255, 255, 0.95);
+            font-size: 1.2rem;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+        }
+
+        .card {
+            background: white;
+            padding: 40px;
+            border-radius: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 30px;
+            font-weight: 900;
+        }
+
+        .flashcard-display {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 25px;
+            padding: 60px 40px;
+            min-height: 350px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.5s;
+            color: white;
+            font-size: 2rem;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 25px;
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.3);
+            position: relative;
+            transform-style: preserve-3d;
+        }
+
+        .flashcard-display:hover {
+            transform: translateY(-5px) rotateY(5deg);
+            box-shadow: 0 20px 50px rgba(102, 126, 234, 0.4);
+        }
+
+        .flashcard-display.flipping {
+            animation: flip 0.6s ease-in-out;
+        }
+
+        @keyframes flip {
+            0% { transform: rotateY(0deg); }
+            50% { transform: rotateY(90deg); }
+            100% { transform: rotateY(0deg); }
+        }
+
+        .flashcard-display.shuffling {
+            animation: shuffle 0.8s ease-in-out;
+        }
+
+        @keyframes shuffle {
+            0% { transform: translateX(0) rotate(0deg); }
+            25% { transform: translateX(-100px) rotate(-10deg); }
+            50% { transform: translateX(100px) rotate(10deg); }
+            75% { transform: translateX(-50px) rotate(-5deg); }
+            100% { transform: translateX(0) rotate(0deg); }
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 700;
+            font-family: 'Fredoka', sans-serif;
+            color: #667eea;
+            font-size: 1.1rem;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 15px;
+            font-size: 1rem;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 700;
+            font-family: 'Fredoka', sans-serif;
+            transition: all 0.3s;
+            margin: 5px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+
+        .btn-success:hover {
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #64748b, #475569);
+        }
+
+        .btn-secondary:hover {
+            box-shadow: 0 6px 20px rgba(100, 116, 139, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+
+        .btn-danger:hover {
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+        }
+
+        .control-buttons {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .section-subtitle {
+            margin-top: 40px;
+            margin-bottom: 20px;
+            font-family: 'Fredoka', sans-serif;
+            color: #667eea;
+            font-size: 1.3rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .flashcard-count {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 1rem;
+        }
+
+        .flashcard-list {
+            max-height: 500px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .flashcard-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .flashcard-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .flashcard-list::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 10px;
+        }
+
+        .flashcard-item {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+            padding: 20px;
+            border-radius: 20px;
+            margin-bottom: 15px;
+            border-left: 5px solid #667eea;
+            transition: all 0.3s;
+            animation: slideIn 0.4s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .flashcard-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .flashcard-item strong {
+            color: #667eea;
+            font-family: 'Fredoka', sans-serif;
+        }
+
+        .flashcard-item div {
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #64748b;
+            font-size: 1.1rem;
+        }
+
+        @media (max-width: 968px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .page-title {
+                font-size: 2.5rem;
+            }
+
+            .flashcard-display {
+                font-size: 1.5rem;
+                min-height: 280px;
+                padding: 40px 30px;
+            }
+
+            .navbar {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Elements -->
+    <div class="particles" id="particles"></div>
+    <div class="floating-cards-bg" id="floatingCards"></div>
+
+    <div class="container">
+        <div class="navbar">
+     <a href="studyhub-homepage.html">← Back to Home</a>
+            <span>📚 StudyHub</span>
+        </div>
+
+        <div class="header">
+            <h1 class="page-title">Flashcards 🎴</h1>
+            <p class="page-description">Create and study flashcards with active recall</p>
+        </div>
+
+        <div class="grid-2">
+            <div class="card">
+                <h3 class="card-title">Study Mode</h3>
+                <div class="flashcard-display" id="flashcardDisplay" onclick="flipFlashcard()">
+                    Click "Next Card" to start studying
+                </div>
+                <div class="control-buttons">
+                    <button class="btn" onclick="flipFlashcard()">🔄 Flip Card</button>
+                    <button class="btn btn-success" onclick="showNextFlashcard()">➡️ Next Card</button>
+                    <button class="btn btn-secondary" onclick="shuffleFlashcards()">🔀 Shuffle</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title">Create Flashcard</h3>
+                <div class="form-group">
+                    <label>❓ Question</label>
+                    <input type="text" id="flashQuestion" placeholder="Enter your question">
+                </div>
+                <div class="form-group">
+                    <label>💡 Answer</label>
+                    <textarea id="flashAnswer" placeholder="Enter the answer"></textarea>
+                </div>
+                <button class="btn" onclick="addFlashcard()">➕ Add Flashcard</button>
+
+                <div class="section-subtitle">
+                    My Flashcards
+                    <span class="flashcard-count" id="flashcardCount">0</span>
+                </div>
+                <div class="flashcard-list" id="flashcardList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Create particles
+        const particlesContainer = document.getElementById('particles');
+        for (let i = 0; i < 30; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.top = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 20 + 's';
+            particle.style.animationDuration = (Math.random() * 15 + 15) + 's';
+            particlesContainer.appendChild(particle);
+        }
+
+        // Create floating cards background
+        const floatingCards = document.getElementById('floatingCards');
+        for (let i = 0; i < 8; i++) {
+            const card = document.createElement('div');
+            card.className = 'bg-card';
+            card.style.left = Math.random() * 100 + '%';
+            card.style.top = Math.random() * 100 + '%';
+            card.style.animationDelay = Math.random() * 20 + 's';
+            card.style.animationDuration = (Math.random() * 15 + 15) + 's';
+            floatingCards.appendChild(card);
+        }
+
+        // Flashcard Logic
+        let flashcards = JSON.parse(localStorage.getItem('flashcards')) || [];
+        let currentFlashIndex = 0;
+        let showingQuestion = true;
+
+        function addFlashcard() {
+            const q = document.getElementById('flashQuestion').value.trim();
+            const a = document.getElementById('flashAnswer').value.trim();
+            
+            if (q && a) {
+                flashcards.push({ q, a, id: Date.now() });
+                localStorage.setItem('flashcards', JSON.stringify(flashcards));
+                document.getElementById('flashQuestion').value = '';
+                document.getElementById('flashAnswer').value = '';
+                alert('✅ Flashcard added successfully!');
+                displayFlashcardList();
+            } else {
+                alert('⚠️ Please fill in both question and answer!');
+            }
+        }
+
+        function displayFlashcardList() {
+            const list = document.getElementById('flashcardList');
+            document.getElementById('flashcardCount').textContent = flashcards.length;
+            
+            if (flashcards.length === 0) {
+                list.innerHTML = '<div class="empty-state">No flashcards yet. Create your first one! 🎯</div>';
+            } else {
+                list.innerHTML = '';
+                flashcards.forEach((card, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'flashcard-item';
+                    
+                    const questionDiv = document.createElement('div');
+                    questionDiv.innerHTML = '<strong>Q:</strong> ' + card.q;
+                    
+                    const answerDiv = document.createElement('div');
+                    answerDiv.style.marginTop = '8px';
+                    answerDiv.style.color = '#64748b';
+                    answerDiv.innerHTML = '<strong>A:</strong> ' + card.a;
+                    
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.className = 'btn btn-danger';
+                    deleteBtn.style.marginTop = '15px';
+                    deleteBtn.style.padding = '10px 20px';
+                    deleteBtn.style.fontSize = '0.9rem';
+                    deleteBtn.textContent = '🗑️ Delete';
+                    deleteBtn.addEventListener('click', function() {
+                        deleteFlashcard(index);
+                    });
+                    
+                    item.appendChild(questionDiv);
+                    item.appendChild(answerDiv);
+                    item.appendChild(deleteBtn);
+                    list.appendChild(item);
+                });
+            }
+        }
+
+        function deleteFlashcard(index) {
+            if (confirm('Delete this flashcard?')) {
+                flashcards.splice(index, 1);
+                localStorage.setItem('flashcards', JSON.stringify(flashcards));
+                
+                // Reset current index if needed
+                if (currentFlashIndex >= flashcards.length) {
+                    currentFlashIndex = 0;
+                }
+                
+                displayFlashcardList();
+                
+                if (flashcards.length === 0) {
+                    document.getElementById('flashcardDisplay').textContent = 'Click "Next Card" to start studying';
+                    showingQuestion = true;
+                } else {
+                    // Update display if we're viewing a card
+                    showingQuestion = true;
+                    document.getElementById('flashcardDisplay').textContent = flashcards[currentFlashIndex].q;
+                }
+            }
+        }
+
+        function showNextFlashcard() {
+            if (flashcards.length === 0) {
+                document.getElementById('flashcardDisplay').textContent = 'No flashcards available. Create some first! 📝';
+                return;
+            }
+            showingQuestion = true;
+            currentFlashIndex = (currentFlashIndex + 1) % flashcards.length;
+            const display = document.getElementById('flashcardDisplay');
+            display.classList.add('flipping');
+            setTimeout(() => {
+                display.textContent = flashcards[currentFlashIndex].q;
+                display.classList.remove('flipping');
+            }, 300);
+        }
+
+        function flipFlashcard() {
+            if (flashcards.length === 0) {
+                alert('⚠️ No flashcards available. Create some first!');
+                return;
+            }
+            
+            const display = document.getElementById('flashcardDisplay');
+            display.classList.add('flipping');
+            
+            setTimeout(() => {
+                if (showingQuestion) {
+                    display.textContent = flashcards[currentFlashIndex].a;
+                } else {
+                    display.textContent = flashcards[currentFlashIndex].q;
+                }
+                showingQuestion = !showingQuestion;
+                display.classList.remove('flipping');
+            }, 300);
+        }
+
+        function shuffleFlashcards() {
+            if (flashcards.length === 0) {
+                alert('⚠️ No flashcards to shuffle!');
+                return;
+            }
+            
+            const display = document.getElementById('flashcardDisplay');
+            display.classList.add('shuffling');
+            
+            flashcards.sort(() => Math.random() - 0.5);
+            localStorage.setItem('flashcards', JSON.stringify(flashcards));
+            currentFlashIndex = 0;
+            
+            setTimeout(() => {
+                alert('🔀 Flashcards shuffled!');
+                displayFlashcardList();
+                display.classList.remove('shuffling');
+            }, 800);
+        }
+
+        // Initialize
+        displayFlashcardList();
+    </script>
+</body>
+</html>
